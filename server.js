@@ -5,12 +5,15 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const helmet = require("helmet");
+const { StatusCodes } = require("http-status-codes");
 
 const db = require("./src/services/db");
+const authRouter = require("./src/routes/auth.route");
+const adminRouter = require("./src/routes/admin.route");
+const { authMiddleware, adminMiddleware } = require("./src/middleware");
+const { errorResponse } = require("./src/utils/response.helper");
 const app = express();
 const PORT = process.env.PORT || 8000;
-const authRouter = require("./src/routes/auth.route");
-const { authMiddleware } = require("./src/middleware");
 
 const main = async () => {
   await db.init("./initDb.sql");
@@ -21,9 +24,21 @@ const main = async () => {
   app.use(bodyParser.urlencoded({ extended: true, limit: "50mb" }));
 
   app.use("/api/v1/auth", authRouter());
+  app.use("/api/v1/admin", authMiddleware, adminMiddleware, adminRouter());
 
   app.use("/", authMiddleware, (req, res) => {
     res.json({ success: true, message: "protected" });
+  });
+
+  app.use((err, req, res, next) => {
+    console.log(err);
+
+    errorResponse(
+      res,
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      err.message,
+      err.stack
+    );
   });
 
   app.listen(PORT, () => {

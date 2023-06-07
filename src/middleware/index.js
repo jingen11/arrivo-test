@@ -1,6 +1,6 @@
 const { StatusCodes } = require("http-status-codes");
 
-const { errorResponse } = require("../utils/error.helper");
+const { errorResponse } = require("../utils/response.helper");
 const { verify } = require("../services/session");
 
 const authMiddleware = (req, res, next) => {
@@ -45,9 +45,44 @@ const authMiddleware = (req, res, next) => {
     );
   }
 
+  req.authToken = authTokenArray[1];
+
   next();
+};
+
+const adminMiddleware = (req, res, next) => {
+  try {
+    const user = verify(req.authToken);
+
+    if (user.membership !== 2) {
+      return errorResponse(res, StatusCodes.FORBIDDEN, "only admin is allowed");
+    }
+  } catch (error) {
+    return errorResponse(
+      res,
+      StatusCodes.UNAUTHORIZED,
+      error.message,
+      error.stack
+    );
+  }
+
+  next();
+};
+
+const asyncWrapper = (fn) => {
+  return (req, res, next) => {
+    (async () => {
+      try {
+        await fn(req, res, next);
+      } catch (error) {
+        next(error);
+      }
+    })();
+  };
 };
 
 module.exports = {
   authMiddleware,
+  adminMiddleware,
+  asyncWrapper,
 };

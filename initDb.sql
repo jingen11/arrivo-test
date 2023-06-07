@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS "category"(
   categoryId VARCHAR(255) PRIMARY KEY, 
   name VARCHAR(255) NOT NULL,
   description VARCHAR(1000) NULL,
-  activated BOOL NOT NULL DEFAULT FALSE,
+  activated BOOLEAN NOT NULL DEFAULT false,
   createdAt TIMESTAMP NOT NULL DEFAULT now(),
   updatedAt TIMESTAMP NULL
 );

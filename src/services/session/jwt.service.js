@@ -7,7 +7,7 @@ const sign = (data) => {
 };
 
 const verify = (token) => {
-  jwt.verify(token, process.env.JWT_SECRET);
+  return jwt.verify(token, process.env.JWT_SECRET);
 };
 
 module.exports = {
