@@ -2,31 +2,34 @@ const express = require("express");
 const { StatusCodes } = require("http-status-codes");
 
 const {
-  getPost,
-  getPosts,
-  sanitisePost,
-} = require("../services/post/post.service");
+  createCategory,
+  getCategory,
+  getCategories,
+  updateCategory,
+  deleteCategory,
+  sanitiseCategory,
+} = require("../services/category/category.service");
 const { errorResponse, dataResponse } = require("../utils/response.helper");
 const { asyncWrapper } = require("../middleware");
 
 const router = express.Router();
 
-const postRoute = () => {
+const categoryRoute = () => {
   router.get("/health", (req, res) => {
     return dataResponse(res, StatusCodes.OK, {
       health: true,
-      path: "postRoute",
+      path: "categoryRoute",
     });
   });
 
   router.get(
-    "/:postId",
+    "/:categoryId",
     asyncWrapper(async (req, res) => {
       try {
-        const post = await getPost(req.params.postId, req.user.membership >= 1);
+        const category = await getCategory(req.params.categoryId);
 
         dataResponse(res, StatusCodes.OK, {
-          post: { ...sanitisePost(post) },
+          category: { ...sanitiseCategory(category) },
         });
       } catch (error) {
         errorResponse(res, StatusCodes.BAD_REQUEST, error.message, error.stack);
@@ -38,17 +41,21 @@ const postRoute = () => {
     "/",
     asyncWrapper(async (req, res) => {
       try {
-        const posts = await getPosts(req.user.membership >= 1);
+        const categories = await getCategories();
 
-        const sanitisedPosts = [];
+        let sanitisedCategories = [];
 
-        for (const post of posts) {
-          sanitisedPosts.push(sanitisePost(post));
+        if (req.query.sanitised === "true") {
+          for (const category of categories) {
+            sanitisedCategories.push(sanitiseCategory(category));
+          }
+        } else {
+          sanitisedCategories = categories;
         }
 
         dataResponse(res, StatusCodes.OK, {
-          posts: sanitisedPosts,
-          count: sanitisedPosts.length,
+          categories: sanitisedCategories,
+          count: sanitisedCategories.length,
         });
       } catch (error) {
         errorResponse(res, StatusCodes.BAD_REQUEST, error.message, error.stack);
@@ -60,10 +67,10 @@ const postRoute = () => {
     "/",
     asyncWrapper(async (req, res) => {
       try {
-        const post = await createPost(req.body.post);
+        const category = await createCategory(req.body.category);
 
         dataResponse(res, StatusCodes.CREATED, {
-          post: { ...sanitisePost(post) },
+          category: { ...sanitiseCategory(category) },
         });
       } catch (error) {
         errorResponse(res, StatusCodes.BAD_REQUEST, error.message, error.stack);
@@ -72,13 +79,16 @@ const postRoute = () => {
   );
 
   router.put(
-    "/:postId",
+    "/:categoryId",
     asyncWrapper(async (req, res) => {
       try {
-        const post = await updatePost(req.params.postId, req.body.post);
+        const category = await updateCategory(
+          req.params.categoryId,
+          req.body.category
+        );
 
         dataResponse(res, StatusCodes.OK, {
-          post: { ...sanitisePost(post) },
+          category: { ...sanitiseCategory(category) },
         });
       } catch (error) {
         errorResponse(res, StatusCodes.BAD_REQUEST, error.message, error.stack);
@@ -87,10 +97,10 @@ const postRoute = () => {
   );
 
   router.delete(
-    "/:postId",
+    "/:categoryId",
     asyncWrapper(async (req, res) => {
       try {
-        await deletePost(req.params.postId);
+        await deleteCategory(req.params.categoryId);
 
         dataResponse(res, StatusCodes.NO_CONTENT, {});
       } catch (error) {
@@ -102,4 +112,4 @@ const postRoute = () => {
   return router;
 };
 
-module.exports = postRoute;
+module.exports = categoryRoute;

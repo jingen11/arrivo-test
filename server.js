@@ -10,6 +10,8 @@ const { StatusCodes } = require("http-status-codes");
 const db = require("./src/services/db");
 const authRouter = require("./src/routes/auth.route");
 const adminRouter = require("./src/routes/admin.route");
+const postRouter = require("./src/routes/post.route");
+const categoryRouter = require("./src/routes/category.route");
 const { authMiddleware, adminMiddleware } = require("./src/middleware");
 const { errorResponse } = require("./src/utils/response.helper");
 const app = express();
@@ -25,6 +27,8 @@ const main = async () => {
 
   app.use("/api/v1/auth", authRouter());
   app.use("/api/v1/admin", authMiddleware, adminMiddleware, adminRouter());
+  app.use("/api/v1/posts", authMiddleware, postRouter());
+  app.use("/api/v1/categories", authMiddleware, categoryRouter());
 
   app.use("/", authMiddleware, (req, res) => {
     res.json({ success: true, message: "protected" });

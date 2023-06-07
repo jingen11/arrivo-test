@@ -35,7 +35,7 @@ const authMiddleware = (req, res, next) => {
   }
 
   try {
-    verify(authTokenArray[1]);
+    req.user = verify(authTokenArray[1]);
   } catch (error) {
     return errorResponse(
       res,
@@ -51,19 +51,8 @@ const authMiddleware = (req, res, next) => {
 };
 
 const adminMiddleware = (req, res, next) => {
-  try {
-    const user = verify(req.authToken);
-
-    if (user.membership !== 2) {
-      return errorResponse(res, StatusCodes.FORBIDDEN, "only admin is allowed");
-    }
-  } catch (error) {
-    return errorResponse(
-      res,
-      StatusCodes.UNAUTHORIZED,
-      error.message,
-      error.stack
-    );
+  if (req.user.membership !== 2) {
+    return errorResponse(res, StatusCodes.FORBIDDEN, "only admin is allowed");
   }
 
   next();

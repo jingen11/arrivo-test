@@ -19,23 +19,43 @@ const register = async (user) => {
     throw new Error("no parameters found");
   }
 
-  if (!user.email || !user.email.trim()) {
+  if (typeof user.email !== "string") {
+    throw new Error("email must be string");
+  }
+
+  if (!user.email.trim()) {
     throw new Error("email cannot be empty");
   }
 
-  if (!user.username || !user.username.trim()) {
+  if (typeof user.username !== "string") {
+    throw new Error("username must be string");
+  }
+
+  if (!user.username.trim()) {
     throw new Error("username cannot be empty");
   }
 
-  if (!user.fullName || !user.fullName.trim()) {
+  if (typeof user.fullName !== "string") {
+    throw new Error("fullName must be string");
+  }
+
+  if (!user.fullName.trim()) {
     throw new Error("fullName cannot be empty");
   }
 
-  if (!user.password || !user.password.trim()) {
+  if (typeof user.password !== "string") {
+    throw new Error("password must be string");
+  }
+
+  if (!user.password.trim()) {
     throw new Error("password cannot be empty");
   }
 
-  if (!user.confirmPassword || !user.confirmPassword.trim()) {
+  if (typeof user.confirmPassword !== "string") {
+    throw new Error("confirmPassword must be string");
+  }
+
+  if (!user.confirmPassword.trim()) {
     throw new Error("confirm password cannot be empty");
   }
 
@@ -96,11 +116,19 @@ const register = async (user) => {
 };
 
 const login = async (cred, password) => {
-  if (!cred || !cred.trim()) {
+  if (typeof cred !== "string") {
+    throw new Error("cred must be string");
+  }
+
+  if (!cred.trim()) {
     throw new Error("username or email cannot be empty");
   }
 
-  if (!password || !password.trim()) {
+  if (typeof password !== "string") {
+    throw new Error("password must be string");
+  }
+
+  if (!password.trim()) {
     throw new Error("password cannot be empty");
   }
 
@@ -137,9 +165,19 @@ const login = async (cred, password) => {
 };
 
 const getUser = async (userId) => {
-  return (
-    await db.select(`SELECT * FROM "user" WHERE userId = $1;`, [userId])
-  )[0];
+  if (typeof userId !== "string") {
+    throw new Error("userId must be string");
+  }
+
+  const user = await db.select(`SELECT * FROM "user" WHERE userId = $1;`, [
+    userId,
+  ]);
+
+  if (user.length === 0) {
+    throw new Error("no users found");
+  }
+
+  return user[0];
 };
 
 const getUsers = async (start = 0, paginate = 50) => {
@@ -150,16 +188,32 @@ const getUsers = async (start = 0, paginate = 50) => {
 };
 
 const updateUser = async (userId, user) => {
+  if (typeof userId !== "string") {
+    throw new Error("userId must be string");
+  }
+
   if (!user) {
     throw new Error("no parameters found");
+  }
+
+  if (user.email && typeof user.email !== "string") {
+    throw new Error("email must be string");
   }
 
   if (user.email && !user.email.trim().match(emailRegex)) {
     throw new Error("invalid email format");
   }
 
+  if (user.username && typeof user.username !== "string") {
+    throw new Error("username must be string");
+  }
+
   if (user.username && user.username.trim().length < 6) {
     throw new Error("username must contain at least 6 characters");
+  }
+
+  if (user.fullName && typeof user.fullName !== "string") {
+    throw new Error("fullName must be string");
   }
 
   try {
@@ -198,6 +252,19 @@ const updateUser = async (userId, user) => {
 };
 
 const deleteUser = async (userId) => {
+  if (typeof userId !== "string") {
+    throw new Error("userId must be string");
+  }
+
+  const count = await db.select(
+    `SELECT COUNT(*) as count FROM "user" WHERE userId =$1`,
+    [userId]
+  );
+
+  if (count[0].count === "0") {
+    throw new Error(`user with id ${userId} does not exists`);
+  }
+
   await db.query(`DELETE FROM "user" WHERE userId = $1;`, [userId]);
 };
 

@@ -27,10 +27,6 @@ const userRoute = () => {
       try {
         const user = await getUser(req.params.userId);
 
-        if (!user) {
-          return errorResponse(res, StatusCodes.BAD_REQUEST, "no user found");
-        }
-
         dataResponse(res, StatusCodes.OK, { user: { ...sanitiseUser(user) } });
       } catch (error) {
         errorResponse(res, StatusCodes.BAD_REQUEST, error.message, error.stack);
@@ -54,7 +50,10 @@ const userRoute = () => {
           sanitisedUsers = users;
         }
 
-        dataResponse(res, StatusCodes.OK, { users: sanitisedUsers });
+        dataResponse(res, StatusCodes.OK, {
+          users: sanitisedUsers,
+          count: sanitisedUsers.length,
+        });
       } catch (error) {
         errorResponse(res, StatusCodes.BAD_REQUEST, error.message, error.stack);
       }

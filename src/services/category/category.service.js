@@ -7,8 +7,20 @@ const createCategory = async (category) => {
     throw new Error("no parameters found");
   }
 
-  if (!category.name || !category.name.trim()) {
+  if (typeof category.name !== "string") {
+    throw new Error("name must be string");
+  }
+
+  if (!category.name.trim()) {
     throw new Error("name cannot be empty");
+  }
+
+  if (category.description && typeof category.description !== "string") {
+    throw new Error("description must be string");
+  }
+
+  if (category.activated && typeof category.activated !== "boolean") {
+    throw new Error("activated must be boolean");
   }
 
   const categoryId = uuid.v4();
@@ -18,7 +30,7 @@ const createCategory = async (category) => {
     [
       categoryId,
       category.name.trim(),
-      category.description,
+      category.description ? category.description.trim() : null,
       category.activated ?? false,
     ]
   );
@@ -27,11 +39,20 @@ const createCategory = async (category) => {
 };
 
 const getCategory = async (categoryId) => {
-  return (
-    await db.select(`SELECT * FROM "category" WHERE categoryId = $1;`, [
-      categoryId,
-    ])
-  )[0];
+  if (typeof categoryId !== "string") {
+    throw new Error("categoryId must be string");
+  }
+
+  const category = await db.select(
+    `SELECT * FROM "category" WHERE categoryId = $1;`,
+    [categoryId]
+  );
+
+  if (category.length === 0) {
+    throw new Error("no categories found");
+  }
+
+  return category[0];
 };
 
 const getCategories = async (start = 0, paginate = 50) => {
@@ -42,8 +63,20 @@ const getCategories = async (start = 0, paginate = 50) => {
 };
 
 const updateCategory = async (categoryId, category) => {
+  if (typeof categoryId !== "string") {
+    throw new Error("categoryId must be string");
+  }
+
   if (!category) {
     throw new Error("no parameters found");
+  }
+
+  if (category.name && typeof category.name !== "string") {
+    throw new Error("name must be string");
+  }
+
+  if (category.description && typeof category.description !== "string") {
+    throw new Error("description must be string");
   }
 
   const updatedCategory = await db.query(
@@ -69,6 +102,19 @@ const updateCategory = async (categoryId, category) => {
 };
 
 const deleteCategory = async (categoryId) => {
+  if (typeof categoryId !== "string") {
+    throw new Error("categoryId must be string");
+  }
+
+  const count = await db.select(
+    `SELECT COUNT(*) as count FROM "category" WHERE categoryId =$1`,
+    [categoryId]
+  );
+
+  if (count[0].count === "0") {
+    throw new Error(`category with id ${categoryId} does not exists`);
+  }
+
   await db.query(`DELETE FROM "category" WHERE categoryId = $1;`, [categoryId]);
 };
 

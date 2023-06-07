@@ -4,9 +4,9 @@ const { StatusCodes } = require("http-status-codes");
 const { register, sanitiseUser } = require("../services/user/user.service");
 const { errorResponse, dataResponse } = require("../utils/response.helper");
 const { asyncWrapper } = require("../middleware");
-const categoryRoute = require("./category.route");
+const categoryRoute = require("./admin.category.route");
 const paymentRoute = require("./payment.route");
-const postRoute = require("./post.route");
+const postRoute = require("./admin.post.route");
 const userRoute = require("./user.route");
 
 const router = express.Router();

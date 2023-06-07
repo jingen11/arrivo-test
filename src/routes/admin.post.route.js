@@ -2,8 +2,11 @@ const express = require("express");
 const { StatusCodes } = require("http-status-codes");
 
 const {
+  createPost,
   getPost,
   getPosts,
+  updatePost,
+  deletePost,
   sanitisePost,
 } = require("../services/post/post.service");
 const { errorResponse, dataResponse } = require("../utils/response.helper");
@@ -23,7 +26,7 @@ const postRoute = () => {
     "/:postId",
     asyncWrapper(async (req, res) => {
       try {
-        const post = await getPost(req.params.postId, req.user.membership >= 1);
+        const post = await getPost(req.params.postId, true);
 
         dataResponse(res, StatusCodes.OK, {
           post: { ...sanitisePost(post) },
@@ -38,12 +41,17 @@ const postRoute = () => {
     "/",
     asyncWrapper(async (req, res) => {
       try {
-        const posts = await getPosts(req.user.membership >= 1);
+        console.log(req.query);
+        const posts = await getPosts(req.query.isPremium === "true");
 
-        const sanitisedPosts = [];
+        let sanitisedPosts = [];
 
-        for (const post of posts) {
-          sanitisedPosts.push(sanitisePost(post));
+        if (req.query.sanitised === "true") {
+          for (const post of posts) {
+            sanitisedPosts.push(sanitisePost(post));
+          }
+        } else {
+          sanitisedPosts = posts;
         }
 
         dataResponse(res, StatusCodes.OK, {
