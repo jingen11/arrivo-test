@@ -8,10 +8,12 @@ const helmet = require("helmet");
 const { StatusCodes } = require("http-status-codes");
 
 const db = require("./src/services/db");
+const network = require("./src/services/network");
 const authRouter = require("./src/routes/auth.route");
 const adminRouter = require("./src/routes/admin.route");
 const postRouter = require("./src/routes/post.route");
 const categoryRouter = require("./src/routes/category.route");
+const paymentRouter = require("./src/routes/payment.route");
 const { authMiddleware, adminMiddleware } = require("./src/middleware");
 const { errorResponse } = require("./src/utils/response.helper");
 const app = express();
@@ -19,6 +21,7 @@ const PORT = process.env.PORT || 8000;
 
 const main = async () => {
   await db.init("./initDb.sql");
+  network.init(process.env.BILLPLZ_BASEURL, `Basic ${process.env.BILLPLZ_KEY}`);
 
   app.use(helmet());
   app.use(cors());
@@ -29,6 +32,7 @@ const main = async () => {
   app.use("/api/v1/admin", authMiddleware, adminMiddleware, adminRouter());
   app.use("/api/v1/posts", authMiddleware, postRouter());
   app.use("/api/v1/categories", authMiddleware, categoryRouter());
+  app.use("/api/v1/payments", authMiddleware, paymentRouter());
 
   app.use("/", authMiddleware, (req, res) => {
     res.json({ success: true, message: "protected" });

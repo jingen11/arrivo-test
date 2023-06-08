@@ -5,7 +5,7 @@ const { register, sanitiseUser } = require("../services/user/user.service");
 const { errorResponse, dataResponse } = require("../utils/response.helper");
 const { asyncWrapper } = require("../middleware");
 const categoryRoute = require("./admin.category.route");
-const paymentRoute = require("./payment.route");
+const paymentRoute = require("./admin.payment.route");
 const postRoute = require("./admin.post.route");
 const userRoute = require("./user.route");
 
@@ -32,7 +32,7 @@ const adminRoute = () => {
     })
   );
 
-  router.get("/", (req, res) => {
+  router.get("/health", (req, res) => {
     return dataResponse(res, StatusCodes.OK, {
       health: true,
       path: "adminRoute",

@@ -41,7 +41,6 @@ const postRoute = () => {
     "/",
     asyncWrapper(async (req, res) => {
       try {
-        console.log(req.query);
         const posts = await getPosts(req.query.isPremium === "true");
 
         let sanitisedPosts = [];

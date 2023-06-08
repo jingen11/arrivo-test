@@ -1,15 +1,15 @@
 const uuid = require("uuid");
 
 const db = require("../db");
-const { sign } = require("../session");
 const { encrypt, decrypt } = require("../../utils/crypto.helper");
 
 const emailRegex = /^([\w-\.]{4,})+@(([\w-]{4,})+\.)+[\w-]{2,4}$/g;
 const passwordRegex = /^(?=.*[A-Za-z])(([A-Za-z])(?=.*\d)).{5,255}$/g;
 
-const superadmin = {
+const SUPERADMIN = {
   userId: "-1",
   username: "superadmin",
+  email: "superadmin@email.com",
   password: "123456",
   membership: 2,
 };
@@ -132,12 +132,8 @@ const login = async (cred, password) => {
     throw new Error("password cannot be empty");
   }
 
-  if (cred === superadmin.username && password === superadmin.password) {
-    return sign({
-      userId: superadmin.userId,
-      username: superadmin.username,
-      membership: superadmin.membership,
-    });
+  if (cred === SUPERADMIN.username && password === SUPERADMIN.password) {
+    return SUPERADMIN;
   }
 
   const userList = await db.select(
@@ -157,11 +153,7 @@ const login = async (cred, password) => {
     throw new Error("invalid password");
   }
 
-  return sign({
-    userId: user.userid,
-    username: user.username,
-    membership: user.membership,
-  });
+  return user;
 };
 
 const getUser = async (userId) => {
@@ -279,6 +271,7 @@ const sanitiseUser = (user) => {
 };
 
 module.exports = {
+  SUPERADMIN,
   register,
   login,
   getUser,
